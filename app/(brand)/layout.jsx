@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import BrandSideBar from "@/components/brandComponents/BrandSideBar";
-import BrandNavbar from "@/components/brandComponents/BrandNavbar";
+import BrandSideBar from "../../components/brandComponents/BrandSidebar";
+import BrandNavbar from "../../components/brandComponents/BrandNavbar";
 
 // interface MyComponentState {
 //   mobileOpen: boolean;
