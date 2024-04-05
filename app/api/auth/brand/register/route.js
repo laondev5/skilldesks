@@ -15,6 +15,8 @@ export async function POST(request) {
     url,
     description,
     image,
+    complete,
+    industry,
   } = body;
   console.log(body);
 
@@ -45,6 +47,8 @@ export async function POST(request) {
       url: url,
       description: description,
       image: image,
+      complete: complete,
+      industry: industry,
     },
   });
 

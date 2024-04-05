@@ -1,5 +1,5 @@
 "use client";
-
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -10,12 +10,14 @@ import {
   FormMessage,
 } from "./ui/form";
 import * as z from "zod";
+import { Circles } from "react-loader-spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
 
 const FormSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email"),
@@ -26,6 +28,7 @@ const FormSchema = z.object({
 });
 
 const BrandLoginForm = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -35,16 +38,29 @@ const BrandLoginForm = () => {
   });
 
   const Router = useRouter();
+  const { toast } = useToast();
 
   const onSubmit = async (values) => {
+    setIsLoading(true);
     const signInData = await signIn("credentials", {
       email: values.email,
       password: values.password,
       redirect: false,
     });
+    setIsLoading(false);
     if (signInData?.error) {
+      toast({
+        variant: "destructive",
+        title: "Failed",
+        description: "login unsuccessful",
+      });
       console.log(signInData.error);
     } else {
+      toast({
+        variant: "success",
+        title: "success",
+        description: "login successful",
+      });
       Router.push("/home");
     }
   };
@@ -86,7 +102,21 @@ const BrandLoginForm = () => {
             />
           </div>
           <Button className="w-full mt-6" type="submit">
-            Sign in
+            {isLoading ? (
+              <div>
+                <Circles
+                  visible={true}
+                  height="80"
+                  width="80"
+                  color="#ffffff"
+                  ariaLabel="progress-bar-loading"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                />
+              </div>
+            ) : (
+              <h2>Sign in</h2>
+            )}
           </Button>
         </form>
         <div className="mx-auto my-4 flex w-full items-center justify-evenly before:mr-4 before:block before:h-px before:flex-grow before:bg-stone-400 after:ml-4 after:block after:h-px after:flex-grow after:bg-stone-400">

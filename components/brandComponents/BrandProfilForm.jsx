@@ -6,6 +6,7 @@ import { Label } from "../ui/label";
 import { UploadCloud } from "lucide-react";
 import { Button } from "../ui/button";
 import { Industries, JobType, Countries } from "@/lib/parameters";
+import { InfinitySpin } from "react-loader-spinner";
 import {
   Select,
   SelectContent,
@@ -16,62 +17,98 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSession } from "next-auth/react";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { updateUser } from "@/app/action/updateAction";
+import { ToastAction } from "@/components/ui/toast";
+import { useToast } from "@/components/ui/use-toast";
 
 const BrandProfilForm = () => {
   const { data: session } = useSession();
   const userData = session?.user;
-  const [data, setData] = useState({
-    brandName: "",
-    url: "",
-    industry: "",
-    description: "",
-    image: "",
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const Router = useRouter();
+  const userId = userData?.id;
+  const { toast } = useToast();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
 
-  // const { ...data, image } = data;
-  console.log({ ...data });
-  const ref = useRef(null);
+  async function uploadData(userId, data) {
+    try {
+      await updateUser(userId, data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  // const handleChange = (e) => {
+  //   setData(() => ({ ...data, [e.target.name]: e.target.value }));
+  // };
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    // get image
+    const rawImage = data?.file[0];
+    //console.log(rawImage);
 
-  const handleClickImage = () => {
-    ref.current?.click();
-  };
-  const handleChange = (e) => {
-    setData(() => ({ ...data, [e.target.name]: e.target.value }));
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log({ data });
-    //console.log(values);
-    // const response = await fetch(`/api/auth/brand/${session?.user.id}`, {
-    //   method: "PATCH",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     brandName: data.brandName,
-    //     url: data.url,
-    //     description: data.description,
-    //     industry: data.industry,
-    //     // image: data.image,
-    //   }),
-    // });
+    //upload image
+    const formData = new FormData();
+    formData.append("file", rawImage);
+    formData.append("upload_preset", "skilldesk"); // Replace with your Cloudinary preset
+    // upload image
+    try {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/laon/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-    // // const info = await response.json();
-    // // console.log(info);
-    // if (response.ok) {
-    //   Router.push("/home");
-    // } else {
-    //   console.error("Registration unsuccessful");
-    // }
+      if (!response.ok) {
+        throw new Error("Image upload failed");
+      }
+      const imageData = await response.json();
+      //console.log("Image uploaded:", imageData);
+      const image = imageData?.secure_url;
+      //console.log(image);
+      const brandData = { ...data, file: image };
+      //console.log(brandData);
+      uploadData(userId, brandData);
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      const message = "An error occurred while submitting the form.";
+    }
   };
-  console.log({ data });
+
   return (
-    <div className="w-[100%]">
+    <div className="w-[100%] relative">
+      {isLoading && (
+        <div className="absolute top-0 left-0 w-[100%] h-screen bg-gray-500/5">
+          <div className="w-full h-full flex justify-center items-center">
+            <div className="flex justify-center items-center w-[10rem] h-[10rem]  rounded-md ">
+              <InfinitySpin
+                height="100"
+                width="100"
+                radius="9"
+                color="green"
+                ariaLabel="loading"
+                wrapperStyle
+                wrapperClass
+              />
+            </div>
+          </div>
+        </div>
+      )}
       <h1 className="text-3xl text-center text-blue-950 font-bold py-8">
         Complete your profile
       </h1>
+
       <form
-        onSubmit={(e) => handleSubmit(e)}
+        onSubmit={handleSubmit(onSubmit)}
         className="grid grid-cols-1 md:grid-cols-2 justify-evenly gap-8 w-[100%]"
       >
         <div className=" my-2">
@@ -81,15 +118,20 @@ const BrandProfilForm = () => {
           >
             Brand name
           </Label>
-          <Input
-            onChange={(e) => handleChange(e)}
+          <input
+            {...register("brandName", { required: true })}
             type="text"
-            name="brandName"
             id="brandName"
             placeholder="Brand name"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
+          {errors.brandName && (
+            <span className="text-red-400 font-normal">
+              BrandName is required
+            </span>
+          )}
         </div>
+
         <div className=" my-2">
           <Label
             className="block text-gray-700 text-sm font-bold mb-2"
@@ -97,15 +139,32 @@ const BrandProfilForm = () => {
           >
             Website Url
           </Label>
-          <Input
-            onChange={(e) => handleChange(e)}
+          <input
+            {...register("url")}
             type="text"
-            name="url"
             id="url"
             placeholder="www.brand.com"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
+
+        <div className="hidden my-2">
+          <Label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="email"
+          >
+            completed
+          </Label>
+          <input
+            {...register("complete")}
+            type="text"
+            value="completed"
+            id="complete"
+            placeholder="www.brand.com"
+            className=" hidden shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+
         <div className=" my-2">
           <Label
             className="block text-gray-700 text-sm font-bold mb-2"
@@ -113,25 +172,23 @@ const BrandProfilForm = () => {
           >
             Select Industry
           </Label>
-          <Select>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select an industry" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {Industries.map((ind, i) => (
-                  <SelectItem
-                    onChange={(e) => handleChange(e)}
-                    value={ind}
-                    name="industry"
-                    key={i}
-                  >
-                    {ind}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <select {...register("industry", { required: true })}>
+            <option value="value1">select an option</option>
+            {Industries.map((ind, i) => (
+              <option
+                // onChange={(e) => handleChange(e)}
+                value={ind}
+                key={i}
+              >
+                {ind}
+              </option>
+            ))}
+          </select>
+          {errors.industry && (
+            <span className="text-red-400 font-normal">
+              Industry is required
+            </span>
+          )}
         </div>
 
         <div className=" my-2">
@@ -141,32 +198,34 @@ const BrandProfilForm = () => {
           >
             Description
           </Label>
-          <Textarea
-            onChange={(e) => handleChange(e)}
-            name="description"
+          <textarea
+            {...register("description", { required: true })}
+            // onChange={(e) => handleChange(e)}
+
             placeholder="Description"
             id="description"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
+          {errors.description && (
+            <span className="text-red-400 font-normal">
+              Description is required
+            </span>
+          )}
         </div>
+
         <div className="my-2">
-          <div
-            onClick={handleClickImage}
-            className="p-4 flex flex-col items-center gap-2 bg-violet-50 text-violet-500 rounded-lg hover:bg-violet-100 cursor-pointer"
-          >
-            <UploadCloud className="w-6 h-6" />
-            <span> upload brand logo</span>
-            <input
-              onChange={(e) => handleChange(e)}
-              type="file"
-              name="image"
-              ref={ref}
-              className="hidden"
-            />
-          </div>
+          <input
+            {...register("file", { required: true })}
+            // onChange={(e) => handleChange(e)}
+            type="file"
+          />
+          {errors.file && (
+            <span className="text-red-400 font-normal">Logo is required</span>
+          )}
         </div>
+
         <div className="my-2">
-          <Button variant="main" size="lg">
+          <Button type="submit" variant="main" size="lg">
             Submit
           </Button>
         </div>

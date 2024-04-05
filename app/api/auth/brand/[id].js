@@ -20,8 +20,8 @@ async function handler(req, res) {
     return res.status(400).json({ message: "Missing user ID" });
   }
 
-  const { brandName, url, description, image, industry } = req.body; // Example data to update
-  console.log(brandName, url, description, image);
+  const { brandName, url, description, image, industry, completed } = req.body; // Example data to update
+  console.log(brandName, url, description, image, completed);
 
   try {
     await prisma.User.update({
@@ -32,6 +32,7 @@ async function handler(req, res) {
         ...(description ? { description } : {}),
         ...(industry ? { industry } : {}),
         ...(image ? { image } : {}),
+        ...(completed ? { completed } : {}),
       },
     });
 

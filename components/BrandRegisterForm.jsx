@@ -16,10 +16,14 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import Link from "next/link";
+import { Circles } from "react-loader-spinner";
+import { useToast } from "@/components/ui/use-toast";
 
 const BrandRegisterForm = () => {
   const Router = useRouter();
   const [status, setStatus] = useState("waiting");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -31,6 +35,7 @@ const BrandRegisterForm = () => {
   });
 
   const onSubmit = async (values) => {
+    setIsLoading(true);
     //console.log(values);
     const response = await fetch("/api/auth/brand/register", {
       method: "POST",
@@ -52,9 +57,20 @@ const BrandRegisterForm = () => {
     // const info = await response.json();
     // console.log(info);
     if (response.ok) {
+      setIsLoading(false);
+      toast({
+        variant: "success",
+        title: "Success",
+        description: "Registration successful",
+      });
       Router.push("/login");
     } else {
-      console.error("Registration unsuccessful");
+      setIsLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Failed",
+        description: "Registration unsuccessful",
+      });
     }
   };
   return (
@@ -124,7 +140,21 @@ const BrandRegisterForm = () => {
             />
           </div>
           <Button className="w-full mt-6" type="submit">
-            Sign up
+            {isLoading ? (
+              <div>
+                <Circles
+                  visible={true}
+                  height="80"
+                  width="80"
+                  color="#ffffff"
+                  ariaLabel="progress-bar-loading"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                />
+              </div>
+            ) : (
+              <h2> Sign up</h2>
+            )}
           </Button>
         </form>
         <div className="mx-auto my-4 flex w-full items-center justify-evenly before:mr-4 before:block before:h-px before:flex-grow before:bg-stone-400 after:ml-4 after:block after:h-px after:flex-grow after:bg-stone-400">
