@@ -17,7 +17,8 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+// import { useToast } from "@/components/ui/use-toast";
+import { Toaster, toast } from "sonner";
 
 const FormSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email"),
@@ -38,7 +39,6 @@ const BrandLoginForm = () => {
   });
 
   const Router = useRouter();
-  const { toast } = useToast();
 
   const onSubmit = async (values) => {
     setIsLoading(true);
@@ -47,26 +47,19 @@ const BrandLoginForm = () => {
       password: values.password,
       redirect: false,
     });
-    setIsLoading(false);
+
     if (signInData?.error) {
-      toast({
-        variant: "destructive",
-        title: "Failed",
-        description: "login unsuccessful",
-      });
-      console.log(signInData.error);
-    } else {
-      toast({
-        variant: "success",
-        title: "success",
-        description: "login successful",
-      });
-      Router.push("/home");
+      setIsLoading(false);
+      toast.error("Failed to sign in");
     }
+    setIsLoading(false);
+    toast.success("Sign in successful");
+    Router.push("/home");
   };
 
   return (
     <div className="w-[80%]">
+      <Toaster position="bottom-right" expand={false} richColors />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
           <div className="space-y-2">

@@ -15,18 +15,103 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Industries, JobType, Countries } from "@/lib/parameters";
-
+import { createJobs } from "@/app/action/createJobs";
+import { useForm } from "react-hook-form";
+import { InfinitySpin } from "react-loader-spinner";
+import { useSession } from "next-auth/react";
+import { Toaster, toast } from "sonner";
 const CreateJob = () => {
-  const ref = useRef();
-  const handleClickImage = () => {
-    ref.current?.click();
+  const [isLoading, setIsLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
+
+  const { data: session } = useSession();
+  const userData = session?.user;
+  const userId = userData?.id;
+  console.log();
+
+  const uploadData = async (userId, data) => {
+    console.log(userId, data);
+    try {
+      const res = await createJobs(userId, data);
+      if (res) {
+        toast.success("Job created successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to create job");
+    }
+  };
+
+  const onSubmit = async (data) => {
+    //console.log(data);
+    setIsLoading(true);
+    // get image
+    const rawImage = data?.file[0];
+    const numString = data?.pay;
+    const payInt = parseInt(numString);
+    //console.log(rawImage);
+
+    //upload image
+    const formData = new FormData();
+    formData.append("file", rawImage);
+    formData.append("upload_preset", "skilldesk"); // Replace with your Cloudinary preset
+    // upload image
+    try {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/laon/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        toast.error("Failed to upload image to cloud");
+      }
+      const imageData = await response.json();
+      //console.log("Image uploaded:", imageData);
+      const image = imageData?.secure_url;
+      //console.log(image);
+      const brandData = { ...data, file: image, pay: payInt };
+      //console.log(brandData);
+      uploadData(userId, brandData);
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      console.log(error);
+    }
   };
   return (
     <div className="w-[100%]">
+      <Toaster position="bottom-right" expand={false} richColors />
+      {isLoading && (
+        <div className="absolute top-0 left-0 w-[100%] h-screen bg-gray-500/5">
+          <div className="w-full h-full flex justify-center items-center">
+            <div className="flex justify-center items-center w-[10rem] h-[10rem]  rounded-md ">
+              <InfinitySpin
+                height="100"
+                width="100"
+                radius="9"
+                color="green"
+                ariaLabel="loading"
+                wrapperStyle
+                wrapperClass
+              />
+            </div>
+          </div>
+        </div>
+      )}
       <h1 className="text-3xl text-center text-blue-950 font-bold py-8">
-        Create a new position
+        Create a new job position
       </h1>
-      <form className="grid grid-cols-1 md:grid-cols-2 justify-evenly gap-8 w-[100%]">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid grid-cols-1 md:grid-cols-2 justify-evenly gap-8 w-[100%]"
+      >
         <div className=" my-2">
           <Label
             className="block text-gray-700 text-sm font-bold mb-2"
@@ -35,9 +120,10 @@ const CreateJob = () => {
             Job Title
           </Label>
           <Input
+            {...register("title")}
             type="text"
-            name="name"
-            id="name"
+            name="title"
+            id="title"
             placeholder="Brand name"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
@@ -50,8 +136,9 @@ const CreateJob = () => {
             Brand name
           </Label>
           <Input
+            {...register("brandName")}
             type="text"
-            name="name"
+            name="brandName"
             id="name"
             placeholder="Brand name"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -64,20 +151,19 @@ const CreateJob = () => {
           >
             Select Industry
           </Label>
-          <Select>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select an industry" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {Industries.map((ind, i) => (
-                  <SelectItem value={ind} key={i}>
-                    {ind}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+
+          <select {...register("industry", { required: true })}>
+            <option value="value1">select an option</option>
+            {Industries.map((ind, i) => (
+              <option
+                // onChange={(e) => handleChange(e)}
+                value={ind}
+                key={i}
+              >
+                {ind}
+              </option>
+            ))}
+          </select>
         </div>
         <div className=" my-2">
           <Label
@@ -86,20 +172,19 @@ const CreateJob = () => {
           >
             Job Type
           </Label>
-          <Select>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select job type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {JobType.map((ind, i) => (
-                  <SelectItem value={ind} key={i}>
-                    {ind}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+
+          <select {...register("jobType", { required: true })}>
+            <option value="value1">select an option</option>
+            {JobType.map((ind, i) => (
+              <option
+                // onChange={(e) => handleChange(e)}
+                value={ind}
+                key={i}
+              >
+                {ind}
+              </option>
+            ))}
+          </select>
         </div>
         <div className=" my-2">
           <Label
@@ -109,8 +194,9 @@ const CreateJob = () => {
             Pay
           </Label>
           <Input
+            {...register("pay")}
             type="number"
-            name="name"
+            name="pay"
             id="name"
             placeholder="Pay"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -126,20 +212,19 @@ const CreateJob = () => {
           >
             Country
           </Label>
-          <Select>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select Country" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {Countries.map((ind, i) => (
-                  <SelectItem value={ind} key={i}>
-                    {ind}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+
+          <select {...register("country", { required: true })}>
+            <option value="value1">select an option</option>
+            {Countries.map((ind, i) => (
+              <option
+                // onChange={(e) => handleChange(e)}
+                value={ind}
+                key={i}
+              >
+                {ind}
+              </option>
+            ))}
+          </select>
         </div>
         <div className=" my-2">
           <Label
@@ -149,6 +234,7 @@ const CreateJob = () => {
             City
           </Label>
           <Input
+            {...register("city")}
             type="text"
             name="city"
             id="city"
@@ -164,19 +250,21 @@ const CreateJob = () => {
             Description
           </Label>
           <Textarea
-            placeholder="Description"
+            {...register("description")}
+            placeholder="description"
             id="description"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
         <div className="my-2">
-          <div
-            onClick={handleClickImage}
-            className="p-4 flex flex-col items-center gap-2 bg-violet-50 text-violet-500 rounded-lg hover:bg-violet-100 cursor-pointer"
+          <Label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="email"
           >
-            <UploadCloud className="w-6 h-6" />
-            <span>Choose some files to upload</span>
-            <input type="file" ref={ref} className="hidden" />
+            Upload cover image
+          </Label>
+          <div className="p-4 flex flex-col items-center gap-2 bg-violet-50 text-violet-500 rounded-lg hover:bg-violet-100 cursor-pointer">
+            <input type="file" className="py-3 px-4" {...register("file")} />
           </div>
         </div>
         <div className="my-2">

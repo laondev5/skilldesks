@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
+import { Toaster, toast } from "sonner";
 
 const page = async () => {
   const session = await getServerSession(authOptions);
@@ -20,6 +21,7 @@ const page = async () => {
   }
   return (
     <div className="">
+      <Toaster position="bottom-right" expand={false} richColors />
       <div className="w-[95%] mx-auto">
         <BrandHeaderCard />
         <CompleteRegistrationButton />

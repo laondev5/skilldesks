@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -19,7 +19,7 @@ const CompleteRegistrationButton = () => {
     }
   };
   useEffect(() => {
-    if (!session?.user?.email) return;
+    if (!session?.user) return;
     else userDetails(session?.user?.id);
   }, []);
   //console.log(data?.status);

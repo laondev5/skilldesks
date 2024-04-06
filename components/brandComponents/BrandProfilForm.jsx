@@ -21,7 +21,8 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { updateUser } from "@/app/action/updateAction";
 import { ToastAction } from "@/components/ui/toast";
-import { useToast } from "@/components/ui/use-toast";
+
+import { Toaster, toast } from "sonner";
 
 const BrandProfilForm = () => {
   const { data: session } = useSession();
@@ -29,7 +30,7 @@ const BrandProfilForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
   const userId = userData?.id;
-  const { toast } = useToast();
+
   const {
     register,
     handleSubmit,
@@ -39,9 +40,13 @@ const BrandProfilForm = () => {
 
   async function uploadData(userId, data) {
     try {
-      await updateUser(userId, data);
+      const res = await updateUser(userId, data);
+      if (res) {
+        toast.success("Registration completed  successfully");
+        Router.push("/home");
+      }
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to complete registration");
     }
   }
   // const handleChange = (e) => {
@@ -68,7 +73,7 @@ const BrandProfilForm = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Image upload failed");
+        toast.error("Failed to upload image to cloud");
       }
       const imageData = await response.json();
       //console.log("Image uploaded:", imageData);
@@ -86,6 +91,7 @@ const BrandProfilForm = () => {
 
   return (
     <div className="w-[100%] relative">
+      <Toaster position="bottom-right" expand={false} richColors />
       {isLoading && (
         <div className="absolute top-0 left-0 w-[100%] h-screen bg-gray-500/5">
           <div className="w-full h-full flex justify-center items-center">

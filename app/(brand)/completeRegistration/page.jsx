@@ -4,6 +4,7 @@ import React from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
+import { Toaster, toast } from "sonner";
 const page = async () => {
   const session = await getServerSession(authOptions);
 
@@ -12,6 +13,7 @@ const page = async () => {
   }
   return (
     <div className="w-[95%] mx-auto">
+      <Toaster position="bottom-right" expand={false} richColors />
       <div className=" w-[90%] mx-auto bg-blue-950 my-4 rounded-md shadow-sm px-10 py-5">
         <div className="flex space-x-4 items-center">
           <div className="">

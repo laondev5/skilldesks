@@ -17,13 +17,14 @@ import {
 import { Input } from "./ui/input";
 import Link from "next/link";
 import { Circles } from "react-loader-spinner";
-import { useToast } from "@/components/ui/use-toast";
+//import { useToast } from "@/components/ui/use-toast";
+import { Toaster, toast } from "sonner";
 
 const BrandRegisterForm = () => {
   const Router = useRouter();
   const [status, setStatus] = useState("waiting");
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  // const { toast } = useToast();
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -58,23 +59,16 @@ const BrandRegisterForm = () => {
     // console.log(info);
     if (response.ok) {
       setIsLoading(false);
-      toast({
-        variant: "success",
-        title: "Success",
-        description: "Registration successful",
-      });
+      toast.success("Registration successful");
       Router.push("/login");
     } else {
       setIsLoading(false);
-      toast({
-        variant: "destructive",
-        title: "Failed",
-        description: "Registration unsuccessful",
-      });
+      toast.error("Failed to Register user");
     }
   };
   return (
     <div className="w-[80%]">
+      <Toaster position="bottom-right" expand={false} richColors />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
           <div className="space-y-2">

@@ -18,7 +18,7 @@ export async function POST(request) {
     complete,
     industry,
   } = body;
-  console.log(body);
+  //console.log(body);
 
   if (!fullname || !email || !password) {
     return new NextResponse("No name, email or password", { status: 400 });
