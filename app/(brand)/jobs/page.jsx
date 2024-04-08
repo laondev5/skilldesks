@@ -5,9 +5,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { Toaster, toast } from "sonner";
+import { getUserData } from "@/app/action/getUserData";
+
 const page = async () => {
   const session = await getServerSession(authOptions);
 
+  //getUserData
   if (!session) {
     redirect("/login");
   }
