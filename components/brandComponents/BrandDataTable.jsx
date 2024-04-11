@@ -9,7 +9,7 @@ import {
   DotsHorizontalIcon,
 } from "@radix-ui/react-icons";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,7 +51,7 @@ const BrandDataTable = ({ userJob }) => {
   const [isDelete, setIsDelete] = useState(false);
   const [deleteData, setDeleteData] = useState("");
   const { data: session } = useSession();
-
+  const router = useRouter();
   const handleIsDelete = (id) => {
     setDeleteData(id);
     setIsDelete(true);
@@ -68,6 +68,18 @@ const BrandDataTable = ({ userJob }) => {
     } catch (error) {
       toast.error("Failed to delete job");
     }
+  };
+
+  const handleEdit = (id) => {
+    console.log(id);
+    router.push(`/edit/${id}`);
+    // const jobId = {
+    //   itemId: id,
+    // };
+    // router.push({
+    //   pathname: "/edit",
+    //   query: jobId,
+    // });
   };
   //console.log(data);
   return (
@@ -124,12 +136,27 @@ const BrandDataTable = ({ userJob }) => {
                           <DropdownMenuContent>
                             <DropdownMenuLabel>Action</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <Link href="#">
+                            <Link
+                              href={{
+                                pathname: "/view",
+                                query: {
+                                  itemId: invoice.id,
+                                },
+                              }}
+                            >
                               <DropdownMenuItem>View</DropdownMenuItem>
                             </Link>
-                            <Link href="#">
+                            <Link
+                              href={{
+                                pathname: "/edit",
+                                query: {
+                                  itemId: invoice.id,
+                                },
+                              }}
+                            >
                               <DropdownMenuItem>Edit</DropdownMenuItem>
                             </Link>
+
                             <DropdownMenuItem>
                               <div
                                 className="text-red-500 font-semibold"
