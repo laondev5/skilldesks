@@ -6,6 +6,15 @@ import { Label } from "../ui/label";
 import { UploadCloud } from "lucide-react";
 import { Button } from "../ui/button";
 import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -16,27 +25,39 @@ import {
 } from "@/components/ui/select";
 import { Industries, JobType, Countries } from "@/lib/parameters";
 import { createJobs } from "@/app/action/createJobs";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { InfinitySpin } from "react-loader-spinner";
 import { useSession } from "next-auth/react";
 import { Toaster, toast } from "sonner";
 import { updateJob } from "@/app/action/updateJob";
+import Tiptap from "../Tiptap";
 const EditJobs = ({ jobData }) => {
   //console.log(jobData);
   const [isLoading, setIsLoading] = useState(false);
+  const [des, setDes] = useState("");
+  const [editorContent, setEditorContent] = useState("");
   const itemId = jobData?.id;
   const {
+    control,
     register,
     handleSubmit,
     watch,
     formState: { errors },
   } = useForm();
 
+  // Event handler to update state when editor content changes
+  // const handleEditorChange = ({ editor }) => {
+  //   console.log(editor);
+  //   setEditorContent(editor.getHTML());
+  // };
+
   const { data: session } = useSession();
   const userData = session?.user;
   const userId = userData?.id;
   console.log();
-
+  const handleContent = (input) => {
+    setDes(input);
+  };
   const uploadData = async (itemId, data) => {
     console.log(itemId, data);
     try {
@@ -50,7 +71,7 @@ const EditJobs = ({ jobData }) => {
   };
 
   const onSubmit = async (data) => {
-    //console.log(data);
+    console.log(data, des);
     setIsLoading(true);
     // get image
     const rawImage = data?.file[0];
@@ -79,7 +100,7 @@ const EditJobs = ({ jobData }) => {
       //console.log("Image uploaded:", imageData);
       const image = imageData?.secure_url;
       //console.log(image);
-      const brandData = { ...data, file: image, pay: payInt };
+      const brandData = { ...data, file: image, pay: payInt, description: des };
       //console.log(brandData);
       uploadData(itemId, brandData);
       setIsLoading(false);
@@ -116,163 +137,250 @@ const EditJobs = ({ jobData }) => {
         className="grid grid-cols-1 md:grid-cols-2 justify-evenly gap-8 w-[100%]"
       >
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Job Title
-          </Label>
-          <Input
-            {...register("title")}
-            // value={jobData.title}
-            type="text"
+          <Controller
             name="title"
-            id="title"
-            placeholder="Brand name"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Job Title
+                </Label>
+                <Input
+                  type="text"
+                  id="title"
+                  name="title"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="Brand name"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+            )}
           />
         </div>
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Brand name
-          </Label>
-          <Input
-            {...register("brandName")}
-            //value={jobData.brandName}
-            type="text"
+          <Controller
             name="brandName"
-            id="name"
-            placeholder="Brand name"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Brand name
+                </Label>
+                <Input
+                  type="text"
+                  id="brandName"
+                  name="brandName"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="Brand name"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+            )}
           />
         </div>
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Select Industry
-          </Label>
+          <Controller
+            name="industry"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Select Industry
+                </Label>
 
-          <select
-            //value={jobData.industry}
-            {...register("industry", { required: true })}
-          >
-            <option value="value1">select an option</option>
-            {Industries.map((ind, i) => (
-              <option
-                // onChange={(e) => handleChange(e)}
-                value={ind}
-                key={i}
-              >
-                {ind}
-              </option>
-            ))}
-          </select>
+                <select
+                  id="industry"
+                  name="industry"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                >
+                  <option value="value1">select an option</option>
+                  {Industries.map((ind, i) => (
+                    <option value={ind} key={i}>
+                      {ind}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          />
         </div>
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Job Type
-          </Label>
+          <Controller
+            name="jobType"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Job Type
+                </Label>
 
-          <select
-            //value={jobData.jobType}
-            {...register("jobType", { required: true })}
-          >
-            <option value="value1">select an option</option>
-            {JobType.map((ind, i) => (
-              <option
-                // onChange={(e) => handleChange(e)}
-                value={ind}
-                key={i}
-              >
-                {ind}
-              </option>
-            ))}
-          </select>
+                <select
+                  id="jobType"
+                  name="jobType"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                >
+                  <option value="value1">select an option</option>
+                  {JobType.map((ind, i) => (
+                    <option value={ind} key={i}>
+                      {ind}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          />
         </div>
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Pay
-          </Label>
-          <Input
-            {...register("pay")}
-            //value={jobData.pay}
-            type="number"
+          <Controller
             name="pay"
-            id="name"
-            placeholder="Pay"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Pay
+                </Label>
+
+                <Input
+                  type="number"
+                  id="pay"
+                  name="pay"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="payment"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+            )}
           />
         </div>
 
-        {/* countries */}
-
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Country
-          </Label>
+          <Controller
+            name="country"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Country
+                </Label>
 
-          <select
-            //value={jobData.country}
-            {...register("country", { required: true })}
-          >
-            <option value="value1">select an option</option>
-            {Countries.map((ind, i) => (
-              <option
-                // onChange={(e) => handleChange(e)}
-                value={ind}
-                key={i}
-              >
-                {ind}
-              </option>
-            ))}
-          </select>
+                <select
+                  id="country"
+                  name="country"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                >
+                  <option value="value1">select an option</option>
+                  {Countries.map((ind, i) => (
+                    <option value={ind} key={i}>
+                      {ind}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          />
         </div>
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            City
-          </Label>
-          <Input
-            {...register("city")}
-            //value={jobData.city}
-            type="text"
+          <Controller
             name="city"
-            id="city"
-            placeholder="city"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  City
+                </Label>
+
+                <Input
+                  type="text"
+                  id="city"
+                  name="city"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="city"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+            )}
           />
         </div>
         <div className=" my-2">
-          <Label
-            htmlFor="message"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Description
-          </Label>
-          <Textarea
+          {/* <Textarea
             {...register("description")}
             //value={jobData.Description}
             placeholder="description"
             id="description"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          /> */}
+          {/* <input
+            type="text"
+            className="hidden"
+            {...register("description")} // Register the editorContent field
+            value={editorContent} // Pass the Tiptap editor content as the value
+          /> */}
+          {/* <Tiptap handleEditorChange={handleEditorChange} /> */}
+
+          <Controller
+            name="description"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value, name } }) => (
+              <div>
+                <Label
+                  htmlFor="message"
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                >
+                  Description
+                </Label>
+                <Tiptap
+                  des={des}
+                  description={name}
+                  onChange={(newContent) => handleContent(newContent)}
+                />
+              </div>
+            )}
           />
         </div>
+
         <div className="my-2">
           <Label
             className="block text-gray-700 text-sm font-bold mb-2"
@@ -281,12 +389,7 @@ const EditJobs = ({ jobData }) => {
             Upload cover image
           </Label>
           <div className="p-4 flex flex-col items-center gap-2 bg-violet-50 text-violet-500 rounded-lg hover:bg-violet-100 cursor-pointer">
-            <input
-              // value={jobData.coverImage}
-              type="file"
-              className="py-3 px-4"
-              {...register("file")}
-            />
+            <input type="file" className="py-3 px-4" {...register("file")} />
           </div>
         </div>
         <div className="my-2">

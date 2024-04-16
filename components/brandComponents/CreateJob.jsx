@@ -16,19 +16,25 @@ import {
 } from "@/components/ui/select";
 import { Industries, JobType, Countries } from "@/lib/parameters";
 import { createJobs } from "@/app/action/createJobs";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { InfinitySpin } from "react-loader-spinner";
 import { useSession } from "next-auth/react";
 import { Toaster, toast } from "sonner";
+import Tiptap from "../Tiptap";
 const CreateJob = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [des, setDes] = useState("");
   const {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm();
 
+  const handleContent = (input) => {
+    setDes(input);
+  };
   const { data: session } = useSession();
   const userData = session?.user;
   const userId = userData?.id;
@@ -76,7 +82,7 @@ const CreateJob = () => {
       //console.log("Image uploaded:", imageData);
       const image = imageData?.secure_url;
       //console.log(image);
-      const brandData = { ...data, file: image, pay: payInt };
+      const brandData = { ...data, file: image, pay: payInt, description: des };
       //console.log(brandData);
       uploadData(userId, brandData);
       setIsLoading(false);
@@ -113,149 +119,250 @@ const CreateJob = () => {
         className="grid grid-cols-1 md:grid-cols-2 justify-evenly gap-8 w-[100%]"
       >
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Job Title
-          </Label>
-          <Input
-            {...register("title")}
-            type="text"
+          <Controller
             name="title"
-            id="title"
-            placeholder="Brand name"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Job Title
+                </Label>
+                <Input
+                  type="text"
+                  id="title"
+                  name="title"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="Brand name"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+            )}
           />
         </div>
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Brand name
-          </Label>
-          <Input
-            {...register("brandName")}
-            type="text"
+          <Controller
             name="brandName"
-            id="name"
-            placeholder="Brand name"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Brand name
+                </Label>
+                <Input
+                  type="text"
+                  id="brandName"
+                  name="brandName"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="Brand name"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+            )}
           />
         </div>
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Select Industry
-          </Label>
+          <Controller
+            name="industry"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Select Industry
+                </Label>
 
-          <select {...register("industry", { required: true })}>
-            <option value="value1">select an option</option>
-            {Industries.map((ind, i) => (
-              <option
-                // onChange={(e) => handleChange(e)}
-                value={ind}
-                key={i}
-              >
-                {ind}
-              </option>
-            ))}
-          </select>
+                <select
+                  id="industry"
+                  name="industry"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                >
+                  <option value="value1">select an option</option>
+                  {Industries.map((ind, i) => (
+                    <option value={ind} key={i}>
+                      {ind}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          />
         </div>
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Job Type
-          </Label>
+          <Controller
+            name="jobType"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Job Type
+                </Label>
 
-          <select {...register("jobType", { required: true })}>
-            <option value="value1">select an option</option>
-            {JobType.map((ind, i) => (
-              <option
-                // onChange={(e) => handleChange(e)}
-                value={ind}
-                key={i}
-              >
-                {ind}
-              </option>
-            ))}
-          </select>
+                <select
+                  id="jobType"
+                  name="jobType"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                >
+                  <option value="value1">select an option</option>
+                  {JobType.map((ind, i) => (
+                    <option value={ind} key={i}>
+                      {ind}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          />
         </div>
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Pay
-          </Label>
-          <Input
-            {...register("pay")}
-            type="number"
+          <Controller
             name="pay"
-            id="name"
-            placeholder="Pay"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Pay
+                </Label>
+
+                <Input
+                  type="number"
+                  id="pay"
+                  name="pay"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="payment"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+            )}
           />
         </div>
 
-        {/* countries */}
-
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            Country
-          </Label>
+          <Controller
+            name="country"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Country
+                </Label>
 
-          <select {...register("country", { required: true })}>
-            <option value="value1">select an option</option>
-            {Countries.map((ind, i) => (
-              <option
-                // onChange={(e) => handleChange(e)}
-                value={ind}
-                key={i}
-              >
-                {ind}
-              </option>
-            ))}
-          </select>
+                <select
+                  id="country"
+                  name="country"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                >
+                  <option value="value1">select an option</option>
+                  {Countries.map((ind, i) => (
+                    <option value={ind} key={i}>
+                      {ind}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          />
         </div>
         <div className=" my-2">
-          <Label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            City
-          </Label>
-          <Input
-            {...register("city")}
-            type="text"
+          <Controller
             name="city"
-            id="city"
-            placeholder="city"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value } }) => (
+              <div>
+                <Label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  City
+                </Label>
+
+                <Input
+                  type="text"
+                  id="city"
+                  name="city"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="city"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+            )}
           />
         </div>
         <div className=" my-2">
-          <Label
-            htmlFor="message"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Description
-          </Label>
-          <Textarea
+          {/* <Textarea
             {...register("description")}
+            //value={jobData.Description}
             placeholder="description"
             id="description"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          /> */}
+          {/* <input
+            type="text"
+            className="hidden"
+            {...register("description")} // Register the editorContent field
+            value={editorContent} // Pass the Tiptap editor content as the value
+          /> */}
+          {/* <Tiptap handleEditorChange={handleEditorChange} /> */}
+
+          <Controller
+            name="description"
+            control={control}
+            defaultValue=""
+            render={({ field: { onChange, onBlur, value, name } }) => (
+              <div>
+                <Label
+                  htmlFor="message"
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                >
+                  Description
+                </Label>
+                <Tiptap
+                  des={des}
+                  description={name}
+                  onChange={(newContent) => handleContent(newContent)}
+                />
+              </div>
+            )}
           />
         </div>
+
         <div className="my-2">
           <Label
             className="block text-gray-700 text-sm font-bold mb-2"

@@ -27,7 +27,7 @@ export default function AboutLayout({ children }) {
           >
             <BrandSideBar />
           </div>
-          <div className="w-[100%] flex bg-gray-50 ">
+          <div className="w-[100%] flex bg-gray-50 h-screen ">
             <div className="w-[20%] hidden lg:block"></div>
             <div className="w-[100%] lg:w-[80%] py-4">{children}</div>
           </div>

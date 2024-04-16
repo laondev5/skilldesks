@@ -47,7 +47,7 @@ import { deleteJob } from "@/app/action/deleteJob";
 import { Toaster, toast } from "sonner";
 
 const BrandDataTable = ({ userJob }) => {
-  //console.log(userJob);
+  console.log(userJob);
   const [isDelete, setIsDelete] = useState(false);
   const [deleteData, setDeleteData] = useState("");
   const { data: session } = useSession();
@@ -69,6 +69,14 @@ const BrandDataTable = ({ userJob }) => {
       toast.error("Failed to delete job");
     }
   };
+
+  // const amount = parseFloat(row.getValue("pay"));
+
+  // // Format the amount as a dollar amount
+  // const formatted = new Intl.NumberFormat("en-NG", {
+  //   style: "currency",
+  //   currency: "NGN",
+  // }).format(amount);
 
   const handleEdit = (id) => {
     console.log(id);

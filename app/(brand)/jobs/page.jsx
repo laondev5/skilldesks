@@ -6,10 +6,14 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { Toaster, toast } from "sonner";
 import { getUserData } from "@/app/action/getUserData";
+import { getJobs } from "@/app/action/getJobs";
 
 const page = async () => {
   const session = await getServerSession(authOptions);
 
+  const res = await getUserData(session.user.id);
+  //console.log(res);
+  const jobs = await getJobs(session.user.id);
   //getUserData
   if (!session) {
     redirect("/login");
@@ -18,7 +22,7 @@ const page = async () => {
     <div className="w-[95%] mx-auto">
       <Toaster position="bottom-right" expand={false} richColors />
       <div className="w-[90%] mx-auto">
-        <div className=" w-[90%] mx-auto bg-white my-4 rounded-md shadow-sm px-10 py-5">
+        <div className=" w-[90%] mx-auto bg-blue-950 my-4 rounded-md shadow-sm px-10 py-5">
           <div className="flex space-x-4 items-center">
             <div className="">
               <p className="text-md font-semibold text-white">
@@ -37,7 +41,7 @@ const page = async () => {
             </div>
           </div>
         </div>
-        <BrandContentTable />
+        <BrandContentTable jobs={jobs} />
       </div>
     </div>
   );

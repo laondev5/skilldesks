@@ -2,19 +2,19 @@ import Image from "next/image";
 import React from "react";
 
 const ViewJob = ({ jobData }) => {
-  console.log(jobData);
+  //console.log(jobData);
   return (
     <div className="">
-      <div className="w-full flex items-center">
-        <div className="flex-2  border bg-white rounded-md">
+      <div className="w-full flex flex-col lg:flex-row items-center">
+        <div className="lg:w-[20%] flex justify-center items-center mx-auto  border bg-white rounded-md h-screen">
           <div className="w-[95%] mx-auto flex flex-col">
-            <div className="w-[10rem] h-[10rem] rounded-full border mb-4">
+            <div className="w-[8rem] h-[8rem] rounded-full border mb-4">
               <Image
                 src={jobData.coverImage}
                 alt="job logo"
                 width={90}
                 height={90}
-                className="w-[10rem] h-[10rem] rounded-full"
+                className="w-[8rem] h-[8rem] rounded-full"
               />
             </div>
             <div className="w-[90%]  mx-auto flex flex-col ">
@@ -59,13 +59,21 @@ const ViewJob = ({ jobData }) => {
             </div>
           </div>
         </div>
-        <div className="flex-1 bg-white border rounded-md">
+        <div className="lg:w-[75%] bg-white border rounded-md h-screen overflow-y-auto">
+          <div className=" bg-blue-950">
+            <div className=" px-4 py-3 text-white text-2xl font-semibold shadow-md">
+              Job details
+            </div>
+          </div>
           <div className="w-[95%] mx-auto flex flex-col">
             {/* <div className="w-[90%] h-[12rem] bg-pink-100 border my-4">
               
             </div> */}
 
-            <div className="w-[90%]">{jobData.Description}</div>
+            <div
+              className="w-[90%] ProseMirror whitespace-pre-line `"
+              dangerouslySetInnerHTML={{ __html: jobData.Description }}
+            />
           </div>
         </div>
       </div>
